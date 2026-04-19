@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#897059">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="/manifest.json">
+  <title>Sanmar Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root{--brand:#897059;--brand-dark:#6d5947;--brand-light:#f4ede5}
+    *{-webkit-tap-highlight-color:transparent}
+    body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f4f7f6;overscroll-behavior-y:contain}
+    .sanmar-brand{font-family:'Georgia','Times New Roman',serif;letter-spacing:4px;color:#897059;text-transform:uppercase}
+    .loader-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--brand);z-index:9999;display:none}
+    .section{display:none}.section.active{display:block}
+    .bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e7eb;display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+    .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 6px;color:#9ca3af;font-size:10px;font-weight:600;gap:3px;cursor:pointer;border:none;background:none}
+    .bn.active,.bn:focus{color:var(--brand);outline:none}.bn i{font-size:18px}
+    .bn-assign{background:var(--brand);border-radius:50%;width:52px;height:52px;color:#fff!important;margin-top:-22px;box-shadow:0 4px 14px rgba(137,112,89,.45);border:3px solid #f4f7f6}
+    .bn-assign.hidden{display:none!important}
+    .sb{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;white-space:nowrap}
+    .sb-ns{background:#e5e7eb;color:#374151}.sb-og{background:#dbeafe;color:#1e40af}
+    .sb-done{background:#d1fae5;color:#065f46}.sb-late{background:#fee2e2;color:#991b1b}
+    .card{background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin:0 0 10px;overflow:hidden;border:1px solid rgba(0,0,0,.05)}
+    .card-tap{cursor:pointer;transition:.12s}.card-tap:active{background:#f9fafb}
+    .sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100}.sheet-overlay.open{display:block}
+    .bottom-sheet{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -4px 30px rgba(0,0,0,.18);z-index:101;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);max-height:92vh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+    .bottom-sheet.open{transform:translateY(0)}
+    .sheet-handle{width:36px;height:4px;background:#e5e7eb;border-radius:2px;margin:10px auto 4px;flex-shrink:0}
+    .filter-pill{padding:5px 14px;border-radius:999px;font-size:12px;font-weight:600;border:1.5px solid #e5e7eb;color:#6b7280;background:#fff;white-space:nowrap}
+    .filter-pill.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .ndot{position:absolute;top:3px;right:3px;width:9px;height:9px;border-radius:50%;background:#ef4444;border:1.5px solid #fff;display:none}
+    .upd-btn{padding:6px 14px;font-size:12px;font-weight:700;border-radius:8px;background:var(--brand);color:#fff;border:none;cursor:pointer}
+    .upd-btn:active{background:var(--brand-dark)}.upd-btn:disabled{opacity:.5}
+    .search-bar{background:#fff;padding:8px 12px;border-radius:12px;display:flex;align-items:center;gap:8px;border:1.5px solid #e5e7eb}
+    .search-bar input{flex:1;border:none;outline:none;font-size:14px;background:transparent}
+    .assign-search-wrap{position:relative}
+    .assign-search-input{width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;outline:none}
+    .assign-search-input:focus{border-color:var(--brand)}
+    .assign-dropdown{position:absolute;left:0;right:0;top:calc(100% + 3px);background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);max-height:160px;overflow-y:auto;z-index:200;display:none}
+    .assign-dropdown.open{display:block}
+    .assign-option{padding:9px 12px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px}
+    .assign-option:active{background:var(--brand-light)}
+    .assign-option.selected{background:#f0fdf4}
+    .assign-tag{background:var(--brand);color:#fff;font-size:11px;padding:4px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:4px}
+    .assign-tag button{background:none;border:none;color:#fff;cursor:pointer;font-size:13px;line-height:1}
+    .assign-tag.secondary{background:#6b7280}
+    .proj-header{background:#fef3c7;border-bottom:1px solid #fde68a;padding:8px 16px}
+    .perf-bar{height:6px;border-radius:3px;background:#e5e7eb;overflow:hidden}
+    .perf-fill{height:100%;border-radius:3px;background:#10b981}
+  </style>
+</head>
+<body>
+<div class="loader-bar" id="loaderBar"></div>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="fixed inset-0 bg-slate-900 z-[9999] flex items-center justify-center p-5">
+  <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm">
+    <div class="text-center mb-8">
+      <img src="https://drive.google.com/uc?export=view&id=1VGqcJgJ_b9KrnI1k7epNEoSkxddRMsK4" alt="" class="w-14 h-14 rounded-full mx-auto mb-3 border-2 border-[#f4ede5]" onerror="this.style.display='none'">
+      <div class="sanmar-brand text-3xl font-bold mb-1">SANMAR</div>
+      <div class="text-xs text-gray-400 tracking-widest uppercase">Project Management Portal</div>
+    </div>
+    <div class="space-y-4">
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
+        <input type="email" id="mEmail" autocomplete="email" inputmode="email" class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#897059] outline-none text-sm" placeholder="name@mysanmar.com"></div>
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Password</label>
+        <input type="password" id="mPass" autocomplete="current-password" class="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#897059] outline-none text-sm" placeholder="••••••••" onkeydown="if(event.key==='Enter')mLogin()"></div>
+      <button onclick="mLogin()" id="mLoginBtn" class="w-full py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 shadow-md" style="background:var(--brand);color:#fff">
+        <span id="mLoginTxt">Sign In</span><i id="mLoginSpin" class="fas fa-spinner fa-spin hidden"></i></button>
+      <p id="mLoginErr" class="text-red-500 text-sm text-center hidden"></p>
+    </div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="appShell" class="hidden pb-[68px]">
+  <!-- Header -->
+  <div class="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm">
+    <div class="flex items-center justify-between px-4 py-3">
+      <div class="sanmar-brand text-xl">SANMAR</div>
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <button onclick="toggleNotifSheet()" class="relative p-2 text-gray-500">
+            <i class="fas fa-bell text-lg"></i><span id="mNotifDot" class="ndot"></span></button>
+        </div>
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:var(--brand)" id="mUserInit">?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pull-to-refresh -->
+  <div class="text-gray-400 text-sm text-center py-2 opacity-0 transition-opacity" id="ptrBar">
+    <i class="fas fa-sync-alt mr-2 text-[var(--brand)]"></i>Release to refresh
+  </div>
+
+  <!-- TASKS -->
+  <div id="sec-tasks" class="section active px-3 pt-3">
+    <div class="grid grid-cols-4 gap-2 mb-3">
+      <div class="text-center bg-white rounded-xl p-2 border border-gray-100 shadow-sm"><p class="text-[10px] text-gray-400 font-bold">TOTAL</p><p class="text-lg font-bold text-gray-800" id="mSTotal">0</p></div>
+      <div class="text-center bg-white rounded-xl p-2 border border-gray-100 shadow-sm"><p class="text-[10px] text-blue-400 font-bold">GOING</p><p class="text-lg font-bold text-blue-600" id="mSOG">0</p></div>
+      <div class="text-center bg-white rounded-xl p-2 border border-gray-100 shadow-sm"><p class="text-[10px] text-green-400 font-bold">DONE</p><p class="text-lg font-bold text-green-600" id="mSDone">0</p></div>
+      <div class="text-center bg-white rounded-xl p-2 border border-gray-100 shadow-sm"><p class="text-[10px] text-red-400 font-bold">LATE</p><p class="text-lg font-bold text-red-500" id="mSLate">0</p></div>
+    </div>
+    <div class="search-bar mb-3"><i class="fas fa-search text-gray-300"></i><input type="text" id="mSearch" placeholder="Search task, project…" oninput="mApplyFilters()"><button onclick="document.getElementById('mSearch').value='';mApplyFilters()" class="text-gray-300 text-sm px-1">×</button></div>
+    <div class="flex gap-2 overflow-x-auto pb-2 mb-2">
+      <button onclick="mSetFilter('All')" class="filter-pill active" data-f="All">All</button>
+      <button onclick="mSetFilter('Not Started')" class="filter-pill" data-f="Not Started">Not Started</button>
+      <button onclick="mSetFilter('On Going')" class="filter-pill" data-f="On Going">On Going</button>
+      <button onclick="mSetFilter('Completed')" class="filter-pill" data-f="Completed">Completed</button>
+      <button onclick="mSetFilter('Delayed')" class="filter-pill" data-f="Delayed">Delayed</button>
+    </div>
+    <div id="mTaskList"></div>
+  </div>
+
+  <!-- PROJECTS -->
+  <div id="sec-projects" class="section px-3 pt-3"><div id="mProjList"></div></div>
+
+  <!-- REPORTS -->
+  <div id="sec-reports" class="section hidden px-3 pt-3">
+    <div class="flex gap-2 mb-4 overflow-x-auto pb-1">
+      <div class="flex-shrink-0 bg-white rounded-xl p-3 text-center border border-gray-100 shadow-sm min-w-[72px]"><p class="text-[10px] text-gray-400 font-bold mb-1">TOTAL</p><p class="text-2xl font-bold text-gray-800" id="rTotal">—</p></div>
+      <div class="flex-shrink-0 bg-white rounded-xl p-3 text-center border border-gray-100 shadow-sm min-w-[72px]"><p class="text-[10px] text-green-400 font-bold mb-1">DONE</p><p class="text-2xl font-bold text-green-600" id="rDone">—</p></div>
+      <div class="flex-shrink-0 bg-white rounded-xl p-3 text-center border border-gray-100 shadow-sm min-w-[72px]"><p class="text-[10px] text-blue-400 font-bold mb-1">GOING</p><p class="text-2xl font-bold text-blue-600" id="rOG">—</p></div>
+      <div class="flex-shrink-0 bg-white rounded-xl p-3 text-center border border-gray-100 shadow-sm min-w-[72px]"><p class="text-[10px] text-red-400 font-bold mb-1">DELAYED</p><p class="text-2xl font-bold text-red-500" id="rDelayed">—</p></div>
+    </div>
+    <div class="card overflow-hidden">
+      <div class="px-4 py-3 bg-gray-50 border-b font-bold text-sm text-gray-700">Project Breakdown</div>
+      <div id="mRptList" class="divide-y divide-gray-50 text-sm"></div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="sec-profile" class="section px-4 pt-6">
+    <div class="card p-5 mb-4">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl font-bold" style="background:var(--brand)" id="mProfInit">?</div>
+        <div><p class="font-bold text-gray-800 text-lg" id="mProfName"></p><p class="text-sm text-gray-500" id="mProfEmail"></p>
+          <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 mt-1 inline-block" id="mProfRole"></span></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3" id="mProfStats"></div>
+    </div>
+    <button onclick="mLogout()" class="w-full py-3.5 rounded-xl border-2 border-red-300 text-red-500 font-bold text-sm flex items-center justify-center gap-2">
+      <i class="fas fa-sign-out-alt"></i>Sign Out</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="bn active" data-s="tasks" onclick="mSwitch('tasks')"><i class="fas fa-tasks"></i><span>Tasks</span></button>
+  <button class="bn" data-s="projects" onclick="mSwitch('projects')"><i class="fas fa-folder"></i><span>Projects</span></button>
+  <button class="bn bn-assign hidden" id="bnAssign" onclick="showMAssign()"><i class="fas fa-plus"></i></button>
+  <button class="bn" data-s="reports" onclick="mSwitch('reports')"><i class="fas fa-chart-bar"></i><span>Reports</span></button>
+  <button class="bn" data-s="profile" onclick="mSwitch('profile')"><i class="fas fa-user"></i><span>Profile</span></button>
+</nav>
+
+<!-- DETAIL SHEET -->
+<div class="sheet-overlay" id="detailOverlay" onclick="closeDetail()"></div>
+<div class="bottom-sheet" id="detailSheet">
+  <div class="sheet-handle"></div>
+  <div class="px-5 py-3 border-b flex justify-between items-start flex-shrink-0">
+    <div><h3 class="font-bold text-gray-800" id="mDetailTitle">Task</h3><p class="text-xs text-gray-400 mt-0.5" id="mDetailSub"></p></div>
+    <button onclick="closeDetail()" class="text-gray-400 p-1"><i class="fas fa-times text-lg"></i></button>
+  </div>
+  <div id="mDetailContent" class="flex-1 overflow-y-auto px-5 py-4 space-y-4"></div>
+</div>
+
+<!-- ASSIGN SHEET -->
+<div class="sheet-overlay" id="assignOverlay" onclick="closeAssign()"></div>
+<div class="bottom-sheet" id="assignSheet">
+  <div class="sheet-handle"></div>
+  <div class="px-5 py-3 border-b flex justify-between items-center flex-shrink-0">
+    <h3 class="font-bold text-gray-800">Assign Task</h3>
+    <button onclick="closeAssign()" class="text-gray-400 p-1"><i class="fas fa-times text-lg"></i></button>
+  </div>
+  <div class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+    <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Project</label>
+      <select id="mAsProj" class="w-full p-3 border rounded-xl text-sm bg-gray-50 outline-none"></select></div>
+    <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Task</label>
+      <select id="mAsTask" onchange="mOnSopChange()" class="w-full p-3 border rounded-xl text-sm bg-gray-50 outline-none"></select></div>
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Dept</label>
+        <input type="text" id="mAsDept" readonly class="w-full p-3 border rounded-xl text-sm bg-gray-100 text-gray-500 outline-none"></div>
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Lead Days</label>
+        <input type="number" id="mAsLead" oninput="mCalcEnd()" class="w-full p-3 border rounded-xl text-sm outline-none"></div>
+    </div>
+    <div>
+      <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Primary Assignee <span class="text-red-400">*</span></label>
+      <div class="assign-search-wrap">
+        <input type="text" id="mPriSearch" class="assign-search-input" placeholder="Search…" autocomplete="off" oninput="mFilterDD('pri')" onfocus="mOpenDD('pri')">
+        <div id="mPriDD" class="assign-dropdown"></div>
+      </div>
+      <div id="mPriTags" class="flex flex-wrap gap-1 mt-1 min-h-[26px]"></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Start Date</label>
+        <input type="date" id="mAsStart" onchange="mCalcEnd()" class="w-full p-3 border rounded-xl text-sm outline-none"></div>
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Planned End</label>
+        <input type="date" id="mAsPlanned" readonly class="w-full p-3 border rounded-xl text-sm bg-gray-100 text-gray-500 outline-none"></div>
+    </div>
+    <button onclick="mConfirmAssign()" id="mAssignBtn" class="w-full py-3.5 rounded-xl font-bold text-sm shadow" style="background:var(--brand);color:#fff">Assign Task</button>
+  </div>
+</div>
+
+<!-- NOTIF SHEET -->
+<div class="sheet-overlay" id="notifOverlay" onclick="closeNotifSheet()"></div>
+<div class="bottom-sheet" id="notifSheet">
+  <div class="sheet-handle"></div>
+  <div class="px-5 py-3 border-b flex justify-between items-center flex-shrink-0">
+    <h3 class="font-bold text-gray-800">Notifications</h3>
+    <button onclick="mMarkRead()" class="text-xs text-blue-600 font-semibold">Mark all read</button>
+  </div>
+  <div id="mNotifList" class="flex-1 overflow-y-auto divide-y divide-gray-50"></div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+const M={user:null,tasks:[],projects:[],sop:[],users:[],filter:'All',search:'',saving:false};
+let mPriSel=[],mNotifTimer=null,mReportsLoaded=false;
+
+function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmtDate(d){if(!d)return '';try{return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch{return d}}
+function showLoader(){const b=document.getElementById('loaderBar');b.style.display='block';b.style.width='20%';setTimeout(()=>b.style.width='70%',100)}
+function hideLoader(){const b=document.getElementById('loaderBar');b.style.width='100%';setTimeout(()=>{b.style.display='none';b.style.width='0'},220)}
+function addWorkDays(s,n){if(!s||isNaN(n)||n<=0)return '';let d=new Date(s+'T00:00:00'),c=1;while(d.getDay()===5||d.getDay()===6)d.setDate(d.getDate()+1);while(c<n){d.setDate(d.getDate()+1);while(d.getDay()===5||d.getDay()===6)d.setDate(d.getDate()+1);c++}return d.toISOString().split('T')[0]}
+
+// ── AUTH ─────────────────────────────────────────────────────────
+async function mLogin(){
+  const email=document.getElementById('mEmail').value.trim();const pass=document.getElementById('mPass').value.trim();
+  const errEl=document.getElementById('mLoginErr');errEl.classList.add('hidden');
+  if(!email||!pass){errEl.textContent='Fill both fields';errEl.classList.remove('hidden');return}
+  document.getElementById('mLoginTxt').textContent='Signing in…';document.getElementById('mLoginSpin').classList.remove('hidden');document.getElementById('mLoginBtn').disabled=true;showLoader();
+  try{const r=await API.login(email,pass);M.user=r.user;localStorage.setItem('sp_user',JSON.stringify(r.user));await mBootstrap()}
+  catch(e){hideLoader();document.getElementById('mLoginTxt').textContent='Sign In';document.getElementById('mLoginSpin').classList.add('hidden');document.getElementById('mLoginBtn').disabled=false;errEl.textContent=e.message||'Login failed';errEl.classList.remove('hidden')}
+}
+async function mLogout(){await API.logout().catch(()=>{});localStorage.removeItem('sp_user');M.user=null;if(mNotifTimer)clearInterval(mNotifTimer);location.reload()}
+
+async function mBootstrap(){
+  showLoader();
+  try{
+    const[tp,pp,up]=await Promise.all([API.getTasks(),API.getProjects(),API.getUsers()]);
+    M.tasks=tp.tasks||[];M.projects=pp.projects||[];M.users=up.users||[];
+    const sr=await API.getSOP();M.sop=sr.sop||[];
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appShell').classList.remove('hidden');
+    const init=(M.user.email[0]||'?').toUpperCase();
+    document.getElementById('mUserInit').textContent=init;
+    document.getElementById('mProfInit').textContent=init;
+    document.getElementById('mProfName').textContent=M.user.name||M.user.email.split('@')[0].toUpperCase();
+    document.getElementById('mProfEmail').textContent=M.user.email;
+    document.getElementById('mProfRole').textContent=M.user.role.toUpperCase();
+    if(M.user.role==='admin'){document.getElementById('bnAssign').classList.remove('hidden');document.getElementById('sec-reports').classList.remove('hidden')}
+    mRenderTasks();mRenderProjects();mRenderProfile();mLoadNotifs();
+    mNotifTimer=setInterval(mLoadNotifs,15000);
+  }catch(e){hideLoader();document.getElementById('loginScreen').style.display='flex';document.getElementById('mLoginErr').textContent='Failed to load: '+e.message;document.getElementById('mLoginErr').classList.remove('hidden')}
+  finally{hideLoader()}
+}
+
+async function mRefresh(){
+  if(!M.user)return;showLoader();
+  try{const[tp,pp]=await Promise.all([API.getTasks(),API.getProjects()]);M.tasks=tp.tasks||[];M.projects=pp.projects||[];mRenderTasks();mRenderProjects();mRenderProfile()}catch(_){}
+  finally{hideLoader()}
+}
+
+// ── SECTIONS ─────────────────────────────────────────────────────
+const MSECS=['tasks','projects','reports','profile'];
+function mSwitch(sec){
+  MSECS.forEach(s=>{const el=document.getElementById('sec-'+s);if(el)el.classList.toggle('active',s===sec)});
+  document.querySelectorAll('.bn[data-s]').forEach(b=>b.classList.toggle('active',b.dataset.s===sec));
+  if(sec==='reports'&&!mReportsLoaded)mLoadReports();
+}
+
+// ── TASK LIST ─────────────────────────────────────────────────────
+function mSetFilter(f){M.filter=f;document.querySelectorAll('.filter-pill').forEach(b=>b.classList.toggle('active',b.dataset.f===f));mRenderTasks()}
+function mApplyFilters(){M.search=(document.getElementById('mSearch').value||'').trim().toLowerCase();mRenderTasks()}
+function mVisibleTasks(){
+  let t=M.tasks.slice();
+  if(M.filter==='Delayed')t=t.filter(x=>x.is_overdue);
+  else if(M.filter!=='All')t=t.filter(x=>x.status.toLowerCase()===M.filter.toLowerCase());
+  if(M.search)t=t.filter(x=>[x.project_name,x.task_code,x.name,x.department,x.status].join(' ').toLowerCase().includes(M.search));
+  return t;
+}
+function mRenderTasks(){
+  const tasks=mVisibleTasks();const list=document.getElementById('mTaskList');list.innerHTML='';
+  const all=M.tasks;
+  document.getElementById('mSTotal').textContent=all.length;
+  document.getElementById('mSOG').textContent=all.filter(t=>t.status==='On Going').length;
+  document.getElementById('mSDone').textContent=all.filter(t=>t.status==='Completed').length;
+  document.getElementById('mSLate').textContent=all.filter(t=>t.is_overdue).length;
+  if(!tasks.length){list.innerHTML='<div class="text-center text-gray-400 py-10 text-sm">No tasks found.</div>';return}
+  let lastProj=null;
+  tasks.forEach(t=>{
+    const stl=t.status.toLowerCase();let bc='sb-ns';
+    if(stl==='completed')bc='sb-done';else if(stl==='on going')bc='sb-og';if(t.is_overdue&&stl!=='completed')bc='sb-late';
+    if(lastProj!==t.project_name){lastProj=t.project_name;const ph=document.createElement('div');ph.className='proj-header mb-0';ph.innerHTML=`<span class="text-xs font-bold text-amber-800 uppercase tracking-wider"><i class="fas fa-folder-open mr-1.5 opacity-70"></i>${esc(t.project_name)}</span>`;list.appendChild(ph)}
+    const card=document.createElement('div');card.className=`card card-tap border-l-4 ${t.is_overdue?'border-l-red-400':t.is_silent?'border-l-yellow-400':'border-l-transparent'}`;
+    card.innerHTML=`<div class="px-4 py-3.5"><div class="flex items-start justify-between gap-2 mb-1.5">
+      <div class="flex-1 min-w-0"><p class="font-semibold text-gray-800 text-sm leading-tight truncate">${esc(t.name)}</p><p class="text-[11px] text-gray-400 mt-0.5">${esc(t.task_code)} · ${esc(t.department||'')}</p></div>
+      <span class="sb ${bc} flex-shrink-0">${esc(t.status)}</span></div>
+      ${t.is_silent?'<div class="text-[11px] text-amber-600 font-semibold mb-1">⚠ No update in 48h+</div>':''}
+      <div class="flex items-center justify-between mt-2">
+        <div class="text-xs text-gray-400">Due: <span class="${t.is_overdue?'text-red-600 font-bold':''}">${fmtDate(t.planned_end)||'—'}</span></div>
+        <button class="upd-btn" onclick="event.stopPropagation();mOpenDetail('${t.id}')">Update</button></div>
+      ${t.latest_activity?`<div class="mt-2 text-[11px] text-gray-500 bg-gray-50 rounded-lg px-2 py-1.5 border border-gray-100 truncate">${esc(t.latest_activity)}</div>`:''}
+    </div>`;
+    card.onclick=()=>mOpenDetail(t.id);list.appendChild(card);
+  });
+}
+
+// ── PROJECTS ─────────────────────────────────────────────────────
+function mRenderProjects(){
+  const list=document.getElementById('mProjList');list.innerHTML='';
+  M.projects.forEach(p=>{
+    const pct=p.total_tasks?Math.round((p.done/p.total_tasks)*100):0;
+    const card=document.createElement('div');card.className='card card-tap p-4 mb-2';
+    card.innerHTML=`<div class="flex justify-between items-center mb-2"><span class="font-bold text-gray-800 text-sm">${esc(p.name)}</span><span class="text-xs font-bold text-gray-500">${p.done||0}/${p.total_tasks||0}</span></div>
+      <div class="perf-bar"><div class="perf-fill" style="width:${pct}%"></div></div>
+      <div class="flex justify-between mt-1.5 text-[10px] text-gray-400"><span>${pct}% complete</span><span class="text-red-500">${p.delayed||0} delayed</span></div>`;
+    card.onclick=()=>{document.getElementById('mSearch').value=p.name;M.search=p.name.toLowerCase();M.filter='All';mSetFilter('All');mSwitch('tasks')};
+    list.appendChild(card);
+  });
+}
+function mRenderProfile(){
+  const my=M.tasks.filter(t=>(t.primary_assignees||[]).some(a=>a.id===M.user.id));
+  document.getElementById('mProfStats').innerHTML=`
+    <div class="text-center bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 font-semibold mb-1">Assigned</p><p class="text-2xl font-bold text-gray-800">${my.length}</p></div>
+    <div class="text-center bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 font-semibold mb-1">On Going</p><p class="text-2xl font-bold text-blue-600">${my.filter(t=>t.status==='On Going').length}</p></div>
+    <div class="text-center bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 font-semibold mb-1">Completed</p><p class="text-2xl font-bold text-green-600">${my.filter(t=>t.status==='Completed').length}</p></div>
+    <div class="text-center bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 font-semibold mb-1">Delayed</p><p class="text-2xl font-bold text-red-500">${my.filter(t=>t.is_overdue).length}</p></div>`;
+}
+
+// ── DETAIL SHEET ──────────────────────────────────────────────────
+async function mOpenDetail(taskId){
+  const task=M.tasks.find(t=>t.id===taskId);if(!task)return;
+  document.getElementById('mDetailTitle').textContent=`${task.task_code} — ${task.project_name}`;
+  document.getElementById('mDetailSub').textContent=task.name;
+  showLoader();
+  let full=task;
+  try{const r=await API.getTask(taskId);full=r.task}catch(_){}
+  hideLoader();
+  const canEdit=M.user.role==='admin'||(full.assignees||[]).some(a=>a.id===M.user.id);
+  const hist=(full.activity_history||[]).slice(0,8).map((e,i)=>`<div class="py-2.5 ${i<Math.min((full.activity_history||[]).length-1,7)?'border-b border-gray-100':''}">
+    <div class="flex gap-2 flex-wrap mb-1"><span class="text-[11px] font-bold text-[#897059] bg-amber-50 px-2 py-0.5 rounded-full">${esc(e.user_label||'system')}</span><span class="text-[11px] text-gray-400">${fmtDate(e.created_at)}</span>${i===0?'<span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">Latest</span>':''}</div>
+    <p class="text-sm text-gray-700">${esc(e.comment)}</p></div>`).join('');
+  const adminFields=M.user.role==='admin'?`<div class="pt-3 border-t border-gray-100">
+    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Slack Note</label>
+    <input type="text" id="mUpSlack" value="${esc(full.slack_note||'')}" class="w-full p-3 border rounded-xl text-sm" placeholder="e.g. delayed 2 days"></div>
+    <button onclick="mDoDelete('${taskId}')" class="w-full py-3 rounded-xl bg-red-500 text-white font-bold text-sm">Delete Task</button>`:'';
+  document.getElementById('mDetailContent').innerHTML=`<div class="space-y-4">
+    <div class="bg-gray-50 rounded-xl p-3 grid grid-cols-2 gap-2 text-xs">
+      <div><p class="text-gray-400 uppercase font-bold mb-0.5">Start</p><p class="font-semibold">${fmtDate(full.start_date)||'—'}</p></div>
+      <div><p class="text-gray-400 uppercase font-bold mb-0.5">Planned End</p><p class="font-semibold ${full.is_overdue?'text-red-600':''}">${fmtDate(full.planned_end)||'—'}</p></div>
+      <div><p class="text-gray-400 uppercase font-bold mb-0.5">Actual End</p><p class="font-semibold ${full.actual_end?'text-green-600':'text-gray-300 italic'}">${fmtDate(full.actual_end)||'Not set'}</p></div>
+      <div><p class="text-gray-400 uppercase font-bold mb-0.5">Lead Time</p><p class="font-semibold">${full.lead_time||'—'}</p></div>
+    </div>
+    <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Status</label>
+      <select id="mUpStatus" class="w-full p-3 border rounded-xl text-sm ${!canEdit?'bg-gray-100':''}" ${!canEdit?'disabled':''}>
+        <option ${full.status==='Not Started'?'selected':''}>Not Started</option>
+        <option ${full.status==='On Going'?'selected':''}>On Going</option>
+        <option ${full.status==='Completed'?'selected':''}>Completed</option>
+      </select></div>
+    <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Actual End Date</label>
+      <input type="date" id="mUpActual" value="${full.actual_end||''}" class="w-full p-3 border rounded-xl text-sm ${!canEdit?'bg-gray-100':''}" ${!canEdit?'disabled':''}></div>
+    <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Activity Update</label>
+      <textarea id="mUpComment" rows="3" class="w-full p-3 border rounded-xl text-sm resize-none outline-none" placeholder="Write your update…" ${!canEdit?'disabled':''}></textarea></div>
+    ${adminFields}
+    <div class="flex gap-2 pt-1">
+      <button onclick="document.getElementById('mUpActual').value=new Date().toISOString().split('T')[0]" class="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold">Today as End</button>
+      ${canEdit?`<button onclick="mDoSave('${taskId}')" id="mSaveBtn" class="flex-1 py-3 rounded-xl font-bold text-sm" style="background:var(--brand);color:#fff">Save</button>`:''}
+    </div>
+    <div><div class="flex items-center gap-2 mb-2"><i class="fas fa-history text-[#897059] text-sm"></i><span class="text-xs font-bold text-gray-600 uppercase">History</span><span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">${(full.activity_history||[]).length}</span></div>
+      <div class="max-h-52 overflow-y-auto">${hist||'<p class="text-sm text-gray-400 py-2">No activity yet.</p>'}</div></div>
+  </div>`;
+  document.getElementById('detailOverlay').classList.add('open');document.getElementById('detailSheet').classList.add('open');
+}
+async function mDoSave(taskId){
+  if(M.saving)return;M.saving=true;const btn=document.getElementById('mSaveBtn');if(btn){btn.disabled=true;btn.textContent='Saving…'}
+  showLoader();
+  try{
+    const payload={status:document.getElementById('mUpStatus').value,actual_end:document.getElementById('mUpActual').value||null,comment:(document.getElementById('mUpComment').value||'').trim()};
+    if(M.user.role==='admin')payload.slack_note=document.getElementById('mUpSlack')?.value||null;
+    await API.updateTask(taskId,payload);const tp=await API.getTasks();M.tasks=tp.tasks||[];closeDetail();mRenderTasks();mRenderProfile();
+  }catch(e){alert(e.message)}
+  finally{hideLoader();M.saving=false;if(btn){btn.disabled=false;btn.textContent='Save'}}
+}
+async function mDoDelete(taskId){
+  if(!confirm('Delete this task?'))return;showLoader();
+  try{await API.deleteTask(taskId);const tp=await API.getTasks();M.tasks=tp.tasks||[];closeDetail();mRenderTasks()}catch(e){alert(e.message)}
+  finally{hideLoader()}
+}
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('open');document.getElementById('detailSheet').classList.remove('open')}
+
+// ── ASSIGN SHEET ──────────────────────────────────────────────────
+function showMAssign(){
+  document.getElementById('mAsProj').innerHTML=M.projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  document.getElementById('mAsTask').innerHTML='<option value="">Select Task</option>'+M.sop.map(s=>`<option value="${s.task_code}" data-dept="${s.department}" data-lead="${s.lead_time_spp||''}">${esc(s.task_code)} — ${esc(s.name)}</option>`).join('');
+  ['mAsStart','mAsLead','mAsPlanned','mAsDept'].forEach(id=>document.getElementById(id).value='');
+  mPriSel=[];mRenderMTags();
+  document.getElementById('assignOverlay').classList.add('open');document.getElementById('assignSheet').classList.add('open');
+}
+function closeAssign(){document.getElementById('assignOverlay').classList.remove('open');document.getElementById('assignSheet').classList.remove('open')}
+function mOnSopChange(){const o=document.getElementById('mAsTask').selectedOptions[0];if(!o||!o.value)return;document.getElementById('mAsDept').value=o.dataset.dept||'';document.getElementById('mAsLead').value=o.dataset.lead||'';mCalcEnd()}
+function mCalcEnd(){const sv=document.getElementById('mAsStart').value;const lv=parseInt(document.getElementById('mAsLead').value,10);document.getElementById('mAsPlanned').value=(!sv||isNaN(lv)||lv<=0)?'':addWorkDays(sv,lv)}
+function mOpenDD(t){document.getElementById('mPriDD').classList.add('open');mRenderDD('')}
+function mFilterDD(){const q=(document.getElementById('mPriSearch').value||'').toLowerCase();mRenderDD(q)}
+function mRenderDD(q){
+  const dd=document.getElementById('mPriDD');dd.innerHTML='';
+  M.users.filter(u=>!q||u.email.toLowerCase().includes(q)||u.name.toLowerCase().includes(q)).forEach(u=>{
+    const isSel=mPriSel.includes(u.id);const div=document.createElement('div');div.className='assign-option'+(isSel?' selected':'');
+    div.innerHTML=`<div style="width:16px;height:16px;border-radius:4px;border:1.5px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;${isSel?'background:#10b981;border-color:#10b981;color:#fff':''}"> ${isSel?'✓':''}</div><span class="font-medium text-sm">${esc(u.name)}</span>`;
+    div.onclick=e=>{e.stopPropagation();const idx=mPriSel.indexOf(u.id);if(idx>-1)mPriSel.splice(idx,1);else mPriSel.push(u.id);mRenderMTags();mRenderDD(document.getElementById('mPriSearch').value||'')};
+    dd.appendChild(div);
+  });
+}
+function mRenderMTags(){const wrap=document.getElementById('mPriTags');wrap.innerHTML='';mPriSel.forEach(uid=>{const u=M.users.find(x=>x.id===uid);if(!u)return;const s=document.createElement('span');s.className='assign-tag';s.innerHTML=`${esc(u.name.split(' ')[0])} <button onclick="mPriSel.splice(mPriSel.indexOf('${uid}'),1);mRenderMTags()">×</button>`;wrap.appendChild(s)})}
+async function mConfirmAssign(){
+  if(!mPriSel.length){alert('Select primary assignee');return}
+  const so=document.getElementById('mAsTask').selectedOptions[0];
+  const payload={task_code:so.value,project_id:document.getElementById('mAsProj').value,name:so.text.split('—').slice(1).join('—').trim(),department:document.getElementById('mAsDept').value,lead_time:parseInt(document.getElementById('mAsLead').value,10)||null,start_date:document.getElementById('mAsStart').value,primary_assignee_ids:mPriSel,secondary_assignee_ids:[]};
+  if(!payload.project_id||!payload.task_code||!payload.start_date){alert('Fill all required fields');return}
+  const btn=document.getElementById('mAssignBtn');btn.disabled=true;btn.textContent='Assigning…';showLoader();
+  try{await API.createTask(payload);const tp=await API.getTasks();M.tasks=tp.tasks||[];closeAssign();mRenderTasks()}catch(e){alert(e.message)}
+  finally{hideLoader();btn.disabled=false;btn.textContent='Assign Task'}
+}
+
+// ── REPORTS ───────────────────────────────────────────────────────
+async function mLoadReports(){
+  mReportsLoaded=true;showLoader();
+  try{
+    const{summary:s}=await API.getSummary();
+    document.getElementById('rTotal').textContent=s.total;document.getElementById('rDone').textContent=s.completed;
+    document.getElementById('rOG').textContent=s.ongoing;document.getElementById('rDelayed').textContent=s.delayed;
+    const list=document.getElementById('mRptList');list.innerHTML='';
+    (s.byProject||[]).forEach(p=>{
+      const pct=p.pct_complete||0;const d=document.createElement('div');d.className='px-4 py-3';
+      d.innerHTML=`<div class="flex justify-between mb-1"><span class="font-semibold text-gray-700">${esc(p.project)}</span><span class="text-xs text-gray-400">${p.done}/${p.total}</span></div>
+        <div class="perf-bar"><div class="perf-fill" style="width:${pct}%"></div></div>
+        <div class="flex justify-between mt-1 text-[10px] text-gray-400"><span>${pct}%</span>${p.delayed>0?`<span class="text-red-500">${p.delayed} delayed</span>`:''}</div>`;
+      list.appendChild(d);
+    });
+  }catch(e){document.getElementById('rTotal').textContent='Err'}
+  finally{hideLoader()}
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────
+function toggleNotifSheet(){document.getElementById('notifOverlay').classList.toggle('open');document.getElementById('notifSheet').classList.toggle('open')}
+function closeNotifSheet(){document.getElementById('notifOverlay').classList.remove('open');document.getElementById('notifSheet').classList.remove('open')}
+async function mLoadNotifs(){
+  if(document.hidden)return;
+  try{const r=await API.getNotifications();mRenderNotifs(r.notifications||[])}catch(_){}
+}
+function mRenderNotifs(list){
+  const dot=document.getElementById('mNotifDot');const holder=document.getElementById('mNotifList');holder.innerHTML='';
+  dot.style.display=list.length?'block':'none';
+  if(list.length){list.forEach(n=>{const d=document.createElement('div');d.className='px-5 py-3 text-sm hover:bg-gray-50 cursor-pointer active:bg-gray-100';d.innerHTML=`<p class="font-semibold text-gray-800">${esc(n.message)}</p><p class="text-xs text-gray-400 mt-0.5">${esc(n.project_name||'')}${n.task_code?' · '+esc(n.task_code):''} · ${fmtDate(n.created_at)}</p>`;d.onclick=()=>{closeNotifSheet();const t=M.tasks.find(x=>x.id===n.task_id);if(t)mOpenDetail(t.id)};holder.appendChild(d)})}
+  else{holder.innerHTML='<div class="text-center py-10 text-gray-400 text-sm"><i class="fas fa-bell-slash text-2xl mb-2 block opacity-40"></i>No new notifications</div>'}
+}
+async function mMarkRead(){document.getElementById('mNotifDot').style.display='none';await API.markNotificationsRead().catch(()=>{});await mLoadNotifs()}
+
+// ── PULL-TO-REFRESH ───────────────────────────────────────────────
+let ptY=0,ptTrig=false;
+document.addEventListener('touchstart',e=>{if(window.scrollY===0)ptY=e.touches[0].clientY;ptTrig=false},{passive:true});
+document.addEventListener('touchmove',e=>{if(!ptY)return;if(e.touches[0].clientY-ptY>60&&window.scrollY===0){document.getElementById('ptrBar').style.opacity='1';ptTrig=true}},{passive:true});
+document.addEventListener('touchend',async()=>{const bar=document.getElementById('ptrBar');if(ptTrig&&bar.style.opacity==='1'){await mRefresh()}bar.style.opacity='0';ptY=0;ptTrig=false});
+
+// Close dropdowns on outside click
+document.addEventListener('click',e=>{const w=document.querySelector('.assign-search-wrap:focus-within');if(!w){document.getElementById('mPriDD')?.classList.remove('open')}});
+
+// ── INIT ──────────────────────────────────────────────────────────
+window.onload=async()=>{
+  const cached=localStorage.getItem('sp_user');
+  if(cached){
+    try{M.user=JSON.parse(cached);const r=await API.getMe().catch(()=>null);if(r?.user){M.user=r.user;await mBootstrap();return}}catch(_){}
+  }
+  document.getElementById('loginScreen').style.display='flex';
+};
+</script>
+</body>
+</html>

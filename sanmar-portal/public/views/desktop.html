@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sanmar Project Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--brand:#897059;--brand-dark:#6d5947;--brand-light:#f4ede5}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f4f7f6;color:#24313f}
+    .sanmar-brand{font-family:'Cinzel','Palatino Linotype',serif;font-weight:400;letter-spacing:4px;color:#897059;text-transform:uppercase}
+    #loader{position:fixed;top:0;left:0;width:100%;height:3px;background:#e2e8f0;z-index:9999;display:none}
+    #loader-bar{height:100%;width:0;background:var(--brand);transition:width .25s}
+    .btn-brand{background:var(--brand);color:#fff;transition:.18s}.btn-brand:hover{background:var(--brand-dark)}
+    .sidebar-item{transition:.15s;cursor:pointer;border-left:3px solid transparent;border-radius:8px}
+    .sidebar-item:hover{background:var(--brand-light);border-left-color:var(--brand);color:var(--brand)}
+    .sidebar-item.active{background:var(--brand);border-left-color:var(--brand-dark);color:#fff}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;justify-content:center;align-items:center;padding:16px}
+    .sb{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;white-space:nowrap}
+    .sb-ns{background:#e5e7eb;color:#374151}.sb-og{background:#dbeafe;color:#1e40af}
+    .sb-done{background:#d1fae5;color:#065f46}.sb-late{background:#fee2e2;color:#991b1b}
+    .ftab{padding:5px 14px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #e5e7eb;color:#6b7280;background:#fff;transition:.15s}
+    .ftab:hover{border-color:var(--brand);color:var(--brand)}.ftab.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .sec-tab{padding:8px 16px;border-bottom:2px solid transparent;font-size:13px;font-weight:600;cursor:pointer;color:#6b7280;white-space:nowrap;transition:.15s}
+    .sec-tab:hover{color:var(--brand)}.sec-tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+    .ct-card{border-left:4px solid;border-radius:10px;background:#fff;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;transition:.15s}
+    .ct-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1)}
+    .ct-urgent{border-color:#f59e0b}.ct-silent{border-color:#8b5cf6}.ct-critical{border-color:#ef4444}
+    .perf-bar{height:8px;border-radius:4px;background:#e5e7eb;overflow:hidden}
+    .perf-fill{height:100%;border-radius:4px;background:#10b981}
+    .board-card{background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.05);border:1px solid #f0f0f0;cursor:pointer;transition:.15s;margin-bottom:8px}
+    .board-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1)}.board-card.blocked{border-left:3px solid #ef4444}
+    .board-col{min-width:280px;max-width:300px;flex-shrink:0}
+    .ndot{position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:#ef4444;border:2px solid #fff;display:none}
+    .upd-btn{padding:5px 13px;font-size:12px;font-weight:700;border-radius:6px;cursor:pointer;background:var(--brand);color:#fff;border:none;transition:.15s;white-space:nowrap}
+    .upd-btn:hover{background:var(--brand-dark)}.upd-btn:disabled{opacity:.5;cursor:not-allowed}
+    .assign-search-wrap{position:relative}
+    .assign-search-input{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;outline:none}
+    .assign-search-input:focus{border-color:var(--brand);box-shadow:0 0 0 2px rgba(137,112,89,.15)}
+    .assign-dropdown{position:absolute;left:0;right:0;top:calc(100% + 3px);background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.1);max-height:200px;overflow-y:auto;z-index:200;display:none}
+    .assign-dropdown.open{display:block}
+    .assign-option{padding:7px 12px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px}
+    .assign-option:hover{background:var(--brand-light)}
+    .assign-option.selected{background:#f0fdf4;color:#065f46}
+    .assign-tag{background:var(--brand);color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;margin:2px}
+    .assign-tag button{background:none;border:none;color:#fff;cursor:pointer;font-size:12px;line-height:1;padding:0}
+    .assign-tag.secondary{background:#6b7280}
+    .scroll-area{max-height:calc(100vh - 315px);overflow:auto}
+    thead.sticky-head th{position:sticky;top:0;z-index:20;background:#f9fafb}
+    .overdue-row td{background:#fff8f8!important}.silent-row td{background:#fffbeb!important}
+    .proj-group-row td{position:sticky;top:40px;z-index:10;background:#fef3c7;border-top:1px solid #fde68a;border-bottom:1px solid #fde68a}
+    .stat-card{border-top:4px solid;transition:.2s}
+    .sc-total{border-color:#9ca3af}.sc-ns{border-color:#f59e0b}.sc-og{border-color:#3b82f6}.sc-done{border-color:#10b981}.sc-late{border-color:#ef4444}
+  </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+<div id="loader"><div id="loader-bar"></div></div>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="fixed inset-0 bg-slate-900 z-[9999] flex items-center justify-center p-4">
+  <div class="bg-white p-8 md:p-10 rounded-2xl shadow-2xl w-full max-w-md">
+    <div class="text-center mb-8">
+      <img src="https://drive.google.com/uc?export=view&id=1VGqcJgJ_b9KrnI1k7epNEoSkxddRMsK4" alt="Sanmar" class="w-14 h-14 rounded-full mx-auto mb-3 border-2 border-[#f4ede5]" onerror="this.style.display='none'">
+      <div class="sanmar-brand text-4xl mb-1">SANMAR</div>
+      <div class="text-xs text-gray-400 tracking-widest uppercase">Project Management Portal</div>
+    </div>
+    <div class="space-y-4">
+      <div><label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Email</label>
+        <input type="email" id="loginEmail" autocomplete="email" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#897059] outline-none text-sm" placeholder="name@mysanmar.com"></div>
+      <div><label class="block text-xs font-semibold text-gray-400 uppercase mb-1">Password</label>
+        <input type="password" id="loginPass" autocomplete="current-password" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#897059] outline-none text-sm" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button onclick="doLogin()" id="loginBtn" class="w-full py-3.5 btn-brand rounded-lg font-bold text-base shadow-md flex items-center justify-center gap-2">
+        <span id="loginBtnText">Sign In</span><i id="loginSpin" class="fas fa-spinner fa-spin hidden"></i></button>
+      <p id="loginError" class="text-red-500 text-sm text-center hidden"></p>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="w-60 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+  <div class="px-4 py-4 border-b border-gray-100 flex items-center gap-2">
+    <img src="https://drive.google.com/uc?export=view&id=1VGqcJgJ_b9KrnI1k7epNEoSkxddRMsK4" alt="S" class="w-7 h-7 rounded-full object-cover flex-shrink-0 border border-[#f4ede5]" onerror="this.style.display='none'">
+    <div class="sanmar-brand text-lg">SANMAR</div>
+  </div>
+  <nav class="flex-1 p-3 overflow-y-auto">
+    <div onclick="setView('All')" id="allProjectBtn" class="sidebar-item active px-4 py-3 mb-3 flex items-center gap-2 font-bold text-base">
+      <i class="fas fa-th-large text-sm opacity-80"></i><span>All Projects</span></div>
+    <div class="text-[10px] font-bold text-gray-400 uppercase px-3 mb-1.5 tracking-wider">Projects</div>
+    <div id="projectMenu" class="space-y-0.5"></div>
+  </nav>
+  <div class="p-3 border-t border-gray-100">
+    <button onclick="doLogout()" class="flex items-center gap-3 text-red-500 font-medium px-4 py-2.5 hover:bg-red-50 rounded-lg w-full transition text-sm">
+      <i class="fas fa-sign-out-alt"></i>Logout</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 flex flex-col overflow-hidden">
+  <header class="bg-white border-b border-gray-200 px-5 py-3 flex justify-between items-center shadow-sm flex-shrink-0">
+    <div class="min-w-0"><h1 id="viewTitle" class="text-lg font-bold text-gray-800 truncate">Project Task Management</h1>
+      <p id="viewSub" class="text-xs text-gray-400">All tasks and updates</p></div>
+    <div class="flex items-center gap-4">
+      <div class="relative" id="notifWrap">
+        <button onclick="toggleNotifs()" class="text-gray-500 hover:text-gray-800 relative p-2">
+          <i class="fas fa-bell text-lg"></i><span id="notifDot" class="ndot"></span></button>
+        <div id="notifDropdown" class="absolute right-0 mt-2 w-80 bg-white shadow-2xl rounded-xl border border-gray-100 hidden z-50 overflow-hidden">
+          <div class="px-4 py-3 border-b bg-gray-50 font-bold text-sm flex justify-between items-center">
+            <span>Notifications</span>
+            <button onclick="markRead()" class="text-xs text-blue-600 hover:underline font-normal">Mark all read</button></div>
+          <div id="notifList" class="max-h-80 overflow-y-auto divide-y divide-gray-50"></div></div></div>
+      <div class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full">
+        <div class="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0" style="background:var(--brand)" id="userInitial">?</div>
+        <span id="userLabel" class="text-sm font-semibold text-gray-700 max-w-[120px] truncate"></span>
+        <span id="roleTag" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 hidden"></span></div></div>
+  </header>
+
+  <!-- Section tabs -->
+  <div class="bg-white border-b border-gray-200 flex px-4 overflow-x-auto flex-shrink-0">
+    <div class="sec-tab active" data-sec="tasks" onclick="switchSection('tasks')"><i class="fas fa-tasks mr-1.5 opacity-60"></i>Tasks</div>
+    <div class="sec-tab hidden" id="stab-control" data-sec="control" onclick="switchSection('control')"><i class="fas fa-tower-broadcast mr-1.5 opacity-60"></i>Control Tower</div>
+    <div class="sec-tab hidden" id="stab-meeting" data-sec="meeting" onclick="switchSection('meeting')"><i class="fas fa-users mr-1.5 opacity-60"></i>Meeting Board</div>
+    <div class="sec-tab hidden" id="stab-reports" data-sec="reports" onclick="switchSection('reports')"><i class="fas fa-chart-bar mr-1.5 opacity-60"></i>Reports</div>
+  </div>
+
+  <!-- TASKS SECTION -->
+  <div id="sec-tasks" class="flex-1 overflow-y-auto p-4 md:p-5 space-y-4">
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 stat-card sc-total"><p class="text-gray-400 text-xs font-semibold mb-1">Total</p><h3 id="stTotal" class="text-2xl font-bold text-gray-800">0</h3></div>
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 stat-card sc-ns"><p class="text-gray-400 text-xs font-semibold mb-1">Not Started</p><h3 id="stNS" class="text-2xl font-bold text-gray-800">0</h3></div>
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 stat-card sc-og"><p class="text-gray-400 text-xs font-semibold mb-1">On Going</p><h3 id="stOG" class="text-2xl font-bold text-gray-800">0</h3></div>
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 stat-card sc-done"><p class="text-gray-400 text-xs font-semibold mb-1">Completed</p><h3 id="stDone" class="text-2xl font-bold text-gray-800">0</h3></div>
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 stat-card sc-late"><p class="text-gray-400 text-xs font-semibold mb-1">Delayed</p><h3 id="stDelayed" class="text-2xl font-bold text-gray-800">0</h3></div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+      <div class="flex flex-wrap gap-2 items-center justify-between">
+        <div class="flex flex-wrap gap-2">
+          <button onclick="setFilter('All')" class="ftab active" data-f="All">All</button>
+          <button onclick="setFilter('Not Started')" class="ftab" data-f="Not Started">Not Started</button>
+          <button onclick="setFilter('On Going')" class="ftab" data-f="On Going">On Going</button>
+          <button onclick="setFilter('Completed')" class="ftab" data-f="Completed">Completed</button>
+          <button onclick="setFilter('Delayed')" class="ftab" style="--active-bg:#ef4444" data-f="Delayed">Delayed</button>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <input type="text" id="taskSearch" oninput="applyFilters()" placeholder="Search…" class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#897059] outline-none w-44">
+          <button id="btnAssign" onclick="showAssign()" class="hidden btn-brand px-4 py-2 rounded-lg font-bold text-sm shadow"><i class="fas fa-plus mr-1"></i>Assign Task</button>
+          <button id="btnBulk" onclick="showBulkModal()" class="hidden px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 text-gray-700 font-bold"><i class="fas fa-layer-group mr-1"></i>Bulk</button>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="scroll-area" id="tableScrollArea">
+        <table class="w-full text-left min-w-[820px]">
+          <thead class="sticky-head bg-gray-50 border-b border-gray-100">
+            <tr>
+              <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">ID</th>
+              <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase">Task</th>
+              <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">Lead</th>
+              <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">Start</th>
+              <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">Planned End</th>
+              <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">Slack</th>
+              <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">Actual End</th>
+              <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">Status</th>
+              <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="taskBody" class="text-sm"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROL TOWER -->
+  <div id="sec-control" class="hidden flex-1 overflow-y-auto p-4 space-y-5">
+    <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-tower-broadcast mr-2 text-amber-500"></i>Admin Control Tower</h2>
+    <div id="ctSections"></div>
+  </div>
+
+  <!-- MEETING BOARD -->
+  <div id="sec-meeting" class="hidden flex-1 flex flex-col overflow-hidden">
+    <div class="p-4 border-b bg-white flex items-center justify-between flex-shrink-0">
+      <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-users mr-2 text-blue-500"></i>Weekly Meeting Board</h2>
+      <button onclick="loadMeeting()" class="btn-brand px-4 py-2 rounded-lg font-bold text-sm"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
+    </div>
+    <div class="flex-1 overflow-auto p-4"><div id="meetingBoard" class="flex gap-4 items-start pb-4"></div></div>
+  </div>
+
+  <!-- REPORTS -->
+  <div id="sec-reports" class="hidden flex-1 overflow-y-auto p-4 space-y-5">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-chart-bar mr-2 text-green-500"></i>Reports</h2>
+      <div class="flex gap-2">
+        <button onclick="loadReports()" class="btn-brand px-4 py-2 rounded-lg font-bold text-sm"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
+        <button onclick="loadWeekly()" class="px-4 py-2 border border-gray-200 rounded-lg font-bold text-sm hover:bg-gray-50 text-gray-700"><i class="fas fa-file-alt mr-1"></i>Weekly Summary</button>
+        <button onclick="printReport()" class="px-4 py-2 border border-gray-200 rounded-lg font-bold text-sm hover:bg-gray-50 text-gray-700"><i class="fas fa-print mr-1"></i>Print</button>
+      </div>
+    </div>
+    <div id="rptOverview" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="px-4 py-3 border-b bg-gray-50 font-bold text-sm">Project Breakdown</div>
+      <table class="w-full text-sm"><thead class="bg-gray-50 border-b"><tr>
+        <th class="px-4 py-2 text-xs font-bold text-gray-500 uppercase text-left">Project</th>
+        <th class="px-4 py-2 text-xs font-bold text-gray-500 uppercase text-center">Total</th>
+        <th class="px-4 py-2 text-xs font-bold text-gray-500 uppercase text-center">Done</th>
+        <th class="px-4 py-2 text-xs font-bold text-gray-500 uppercase text-center">Ongoing</th>
+        <th class="px-4 py-2 text-xs font-bold text-gray-500 uppercase text-center">Delayed</th>
+        <th class="px-4 py-2 text-xs font-bold text-gray-500 uppercase text-center">Progress</th>
+      </tr></thead><tbody id="rptProjBody"></tbody></table>
+    </div>
+    <div id="rptWeeklyWrap" class="hidden bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="px-4 py-3 border-b bg-gray-50 font-bold text-sm">Weekly Summary</div>
+      <pre id="rptWeeklyText" class="p-4 text-xs font-mono whitespace-pre-wrap leading-relaxed"></pre>
+    </div>
+  </div>
+</main>
+
+<!-- DETAIL MODAL -->
+<div id="detailModal" class="modal">
+  <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div class="bg-gray-50 px-5 py-4 border-b flex justify-between items-center flex-shrink-0">
+      <div><h3 class="text-lg font-bold text-gray-800" id="detailTitle">Task Update</h3><p class="text-xs text-gray-400" id="detailSub"></p></div>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="detailContent" class="flex-1 overflow-y-auto p-5"></div>
+  </div>
+</div>
+
+<!-- ASSIGN MODAL -->
+<div id="assignModal" class="modal">
+  <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
+    <div class="bg-gray-50 px-5 py-4 border-b flex justify-between items-center">
+      <h3 class="text-lg font-bold text-gray-800">Assign New Task</h3>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Project</label>
+          <select id="asProj" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50 outline-none"></select></div>
+        <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Task</label>
+          <select id="asTask" onchange="onSopChange()" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50 outline-none"></select></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Department</label>
+          <input type="text" id="asDept" readonly class="w-full p-2.5 border rounded-lg text-sm bg-gray-100 text-gray-500 outline-none"></div>
+        <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Lead Time (Days)</label>
+          <input type="number" id="asLead" oninput="calcEnd()" class="w-full p-2.5 border rounded-lg text-sm outline-none"></div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Primary Assignee <span class="text-red-400">*</span></label>
+        <div class="assign-search-wrap" id="priWrap">
+          <input type="text" id="priSearch" class="assign-search-input" placeholder="Search primary assignee…" autocomplete="off" oninput="filterDD('pri')" onfocus="openDD('pri')">
+          <div id="priDD" class="assign-dropdown"></div>
+        </div>
+        <div id="priTags" class="flex flex-wrap gap-1 mt-1 min-h-[26px]"></div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Secondary Assignees</label>
+        <div class="assign-search-wrap" id="secWrap">
+          <input type="text" id="secSearch" class="assign-search-input" placeholder="Search secondary…" autocomplete="off" oninput="filterDD('sec')" onfocus="openDD('sec')">
+          <div id="secDD" class="assign-dropdown"></div>
+        </div>
+        <div id="secTags" class="flex flex-wrap gap-1 mt-1 min-h-[26px]"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Start Date</label>
+          <input type="date" id="asStart" onchange="calcEnd()" class="w-full p-2.5 border rounded-lg text-sm outline-none"></div>
+        <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Planned End (auto)</label>
+          <input type="date" id="asPlanned" readonly class="w-full p-2.5 border rounded-lg text-sm bg-gray-100 text-gray-500 outline-none"></div>
+      </div>
+      <div class="flex justify-end gap-3 pt-1">
+        <button onclick="closeModal()" class="px-4 py-2.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm">Cancel</button>
+        <button onclick="confirmAssign()" id="assignBtn" class="px-5 py-2.5 btn-brand rounded-lg font-bold text-sm shadow">Assign Task</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BULK MODAL -->
+<div id="bulkModal" class="modal">
+  <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+    <div class="bg-gray-50 px-5 py-4 border-b flex justify-between items-center">
+      <h3 class="text-lg font-bold text-gray-800">Bulk Status Update</h3>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <p class="text-sm text-gray-500">Select tasks from the table (use checkboxes), then choose a status to apply to all selected.</p>
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">New Status</label>
+        <select id="bulkStatus" class="w-full p-2.5 border rounded-lg text-sm outline-none">
+          <option>Not Started</option><option>On Going</option><option>Completed</option>
+        </select></div>
+      <p class="text-sm text-gray-700"><span id="bulkCount" class="font-bold text-[#897059]">0</span> tasks selected</p>
+      <div class="flex justify-end gap-3">
+        <button onclick="closeModal()" class="px-4 py-2.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm">Cancel</button>
+        <button onclick="confirmBulk()" class="px-5 py-2.5 btn-brand rounded-lg font-bold text-sm shadow">Apply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+// ── STATE ────────────────────────────────────────────────────────
+const S = { user:null, tasks:[], projects:[], sop:[], users:[], filter:'All', search:'', activeProj:null, saving:false, selectedIds:new Set() };
+let priSel = [], secSel = [], notifTimer = null, currentTaskId = null;
+
+// ── UTILS ────────────────────────────────────────────────────────
+function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmtDate(d){if(!d)return '';try{return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}catch{return d}}
+function showLoader(){const b=document.getElementById('loader-bar');document.getElementById('loader').style.display='block';b.style.width='20%';setTimeout(()=>b.style.width='68%',180)}
+function hideLoader(){const b=document.getElementById('loader-bar');b.style.width='100%';setTimeout(()=>{document.getElementById('loader').style.display='none';b.style.width='0'},220)}
+function addWorkDays(startStr,total){if(!startStr||isNaN(total)||total<=0)return '';let d=new Date(startStr+'T00:00:00'),c=1;while(!isWD(d))d.setDate(d.getDate()+1);while(c<total){d.setDate(d.getDate()+1);while(!isWD(d))d.setDate(d.getDate()+1);c++}return d.toISOString().split('T')[0]}
+function isWD(d){return d.getDay()!==5&&d.getDay()!==6}
+
+// ── AUTH ─────────────────────────────────────────────────────────
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value.trim();
+  const errEl=document.getElementById('loginError');
+  errEl.classList.add('hidden');
+  if(!email||!pass){errEl.textContent='Please fill both fields';errEl.classList.remove('hidden');return}
+  document.getElementById('loginBtnText').textContent='Signing in…';
+  document.getElementById('loginSpin').classList.remove('hidden');
+  document.getElementById('loginBtn').disabled=true;
+  showLoader();
+  try{
+    const r=await API.login(email,pass);
+    S.user=r.user;
+    localStorage.setItem('sp_user',JSON.stringify(r.user));
+    await bootstrap();
+  }catch(e){hideLoader();document.getElementById('loginBtnText').textContent='Sign In';document.getElementById('loginSpin').classList.add('hidden');document.getElementById('loginBtn').disabled=false;errEl.textContent=e.message||'Login failed';errEl.classList.remove('hidden')}
+}
+async function doLogout(){await API.logout();localStorage.removeItem('sp_user');S.user=null;S.tasks=[];if(notifTimer)clearInterval(notifTimer);location.reload()}
+
+// ── BOOTSTRAP ────────────────────────────────────────────────────
+async function bootstrap(){
+  showLoader();
+  try{
+    const[tp,sp,up]=await Promise.all([API.getTasks(),API.getProjects(),API.getUsers()]);
+    S.tasks=tp.tasks||[];S.projects=sp.projects||[];S.users=up.users||[];
+    const sopR=await API.getSOP();S.sop=sopR.sop||[];
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('userLabel').textContent=(S.user.email.split('@')[0]||'').toUpperCase();
+    document.getElementById('userInitial').textContent=(S.user.email[0]||'?').toUpperCase();
+    if(S.user.role==='admin'||S.user.role==='management'){
+      const rt=document.getElementById('roleTag');rt.textContent=S.user.role.toUpperCase();rt.classList.remove('hidden');
+      document.getElementById('stab-control').classList.remove('hidden');
+      document.getElementById('stab-reports').classList.remove('hidden');
+    }
+    if(S.user.hasMeeting||S.user.role==='admin'||S.user.role==='management'){
+      document.getElementById('stab-meeting').classList.remove('hidden');
+    }
+    if(S.user.role==='admin'){
+      document.getElementById('btnAssign').classList.remove('hidden');
+      document.getElementById('btnBulk').classList.remove('hidden');
+    }
+    buildMenu();renderTasks();loadNotifs();
+    notifTimer=setInterval(loadNotifs,15000);
+  }catch(e){alert('Failed to load: '+e.message)}
+  finally{hideLoader()}
+}
+
+// ── SIDEBAR & FILTERS ─────────────────────────────────────────────
+function buildMenu(){
+  const menu=document.getElementById('projectMenu');menu.innerHTML='';
+  S.projects.forEach(p=>{
+    const div=document.createElement('div');div.className='sidebar-item px-4 py-2.5 text-sm font-medium flex items-center justify-between gap-2';div.dataset.proj=p.name;
+    div.innerHTML=`<span class="truncate">${esc(p.name)}</span><span class="text-xs text-gray-400">${p.done||0}/${p.total_tasks||0}</span>`;
+    div.onclick=()=>{S.activeProj=p.name;document.getElementById('viewTitle').textContent=p.name;document.getElementById('allProjectBtn').classList.remove('active');document.querySelectorAll('#projectMenu .sidebar-item').forEach(x=>x.classList.remove('active'));div.classList.add('active');renderTasks()};
+    menu.appendChild(div);
+  });
+}
+function setView(v){S.activeProj=null;document.getElementById('viewTitle').textContent='Project Task Management';document.getElementById('allProjectBtn').classList.add('active');document.querySelectorAll('#projectMenu .sidebar-item').forEach(x=>x.classList.remove('active'));renderTasks()}
+function setFilter(f){S.filter=f;document.querySelectorAll('.ftab').forEach(b=>b.classList.toggle('active',b.dataset.f===f));renderTasks()}
+function applyFilters(){S.search=(document.getElementById('taskSearch').value||'').trim().toLowerCase();renderTasks()}
+
+// ── TASK TABLE ────────────────────────────────────────────────────
+function visibleTasks(){
+  let t=S.tasks.slice();
+  if(S.activeProj)t=t.filter(x=>x.project_name===S.activeProj);
+  if(S.filter==='Delayed')t=t.filter(x=>x.is_overdue);
+  else if(S.filter!=='All')t=t.filter(x=>x.status.toLowerCase()===S.filter.toLowerCase());
+  if(S.search)t=t.filter(x=>[x.project_name,x.task_code,x.name,x.department,x.status].join(' ').toLowerCase().includes(S.search));
+  return t;
+}
+function renderTasks(){
+  const tasks=visibleTasks();
+  const scope=S.activeProj?S.tasks.filter(t=>t.project_name===S.activeProj):S.tasks;
+  document.getElementById('stTotal').textContent=scope.length;
+  document.getElementById('stNS').textContent=scope.filter(t=>t.status==='Not Started').length;
+  document.getElementById('stOG').textContent=scope.filter(t=>t.status==='On Going').length;
+  document.getElementById('stDone').textContent=scope.filter(t=>t.status==='Completed').length;
+  document.getElementById('stDelayed').textContent=scope.filter(t=>t.is_overdue).length;
+  const tbody=document.getElementById('taskBody');tbody.innerHTML='';
+  let lastProj=null;
+  tasks.forEach(t=>{
+    const stl=t.status.toLowerCase();
+    let bc='sb-ns';if(stl==='completed')bc='sb-done';else if(stl==='on going')bc='sb-og';if(t.is_overdue&&stl!=='completed')bc='sb-late';
+    const pri=(t.primary_assignees||[]).map(a=>a.email.split('@')[0]).join(', ');
+    if(!S.activeProj&&t.project_name!==lastProj){lastProj=t.project_name;const gr=document.createElement('tr');gr.className='proj-group-row';gr.innerHTML=`<td colspan="9" class="px-4 py-2 text-xs font-bold text-amber-800 uppercase tracking-wider"><i class="fas fa-folder-open mr-1.5 opacity-70"></i>${esc(t.project_name)}</td>`;tbody.appendChild(gr)}
+    const tr=document.createElement('tr');tr.className=(t.is_silent?'silent-row':t.is_overdue?'overdue-row':'hover:bg-gray-50 transition')+(S.selectedIds.has(t.id)?' bg-blue-50':'');
+    const chk=S.user.role==='admin'?`<input type="checkbox" class="task-chk" data-id="${t.id}" ${S.selectedIds.has(t.id)?'checked':''} onclick="toggleSel('${t.id}')">`:''
+    tr.innerHTML=`<td class="px-3 py-3 text-xs text-gray-400 text-center">${chk} ${esc(t.task_code)}</td>
+      <td class="px-4 py-3 max-w-xs"><div class="font-semibold text-gray-800 text-sm leading-tight">${esc(t.name)}</div>
+        <div class="text-xs text-gray-400">${esc(t.department||'')} · ${esc(pri)}</div>
+        ${t.is_silent?'<span class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold">⚠ Silent</span>':''}
+        ${t.latest_activity?`<div class="mt-1 text-[11px] text-gray-500 bg-gray-50 rounded px-2 py-1 border border-gray-100 truncate">${esc(t.latest_activity)}</div>`:''}
+      </td>
+      <td class="px-4 py-3 text-xs text-center text-gray-600">${t.lead_time||'—'}</td>
+      <td class="px-4 py-3 text-xs text-center">${fmtDate(t.start_date)}</td>
+      <td class="px-4 py-3 text-xs text-center font-semibold ${t.is_overdue?'text-red-600':'text-gray-700'}">${fmtDate(t.planned_end)}</td>
+      <td class="px-4 py-3 text-center text-xs">${t.slack_note?`<span class="text-amber-600">${esc(t.slack_note)}</span>`:'<span class="text-gray-300">—</span>'}</td>
+      <td class="px-4 py-3 text-xs text-center ${t.actual_end?'text-green-600 font-medium':'text-gray-300 italic'}">${t.actual_end?fmtDate(t.actual_end):'Not set'}</td>
+      <td class="px-4 py-3 text-center"><span class="sb ${bc}">${esc(t.status)}</span></td>
+      <td class="px-4 py-3 text-center"><button class="upd-btn" onclick="openDetail('${t.id}')">Update</button></td>`;
+    tbody.appendChild(tr);
+  });
+  if(!tasks.length){const tr=document.createElement('tr');tr.innerHTML=`<td colspan="9" class="px-4 py-10 text-center text-gray-400 text-sm">No tasks found.</td>`;tbody.appendChild(tr)}
+}
+function toggleSel(id){if(S.selectedIds.has(id))S.selectedIds.delete(id);else S.selectedIds.add(id);renderTasks();document.getElementById('bulkCount').textContent=S.selectedIds.size}
+
+// ── DETAIL MODAL ──────────────────────────────────────────────────
+async function openDetail(taskId){
+  currentTaskId=taskId;
+  const task=S.tasks.find(t=>t.id===taskId);
+  if(!task)return;
+  document.getElementById('detailTitle').textContent=`${task.task_code} — ${task.project_name}`;
+  document.getElementById('detailSub').textContent=task.name;
+  const canEdit=S.user.role==='admin'||(task.assignees||[]).some(a=>a.id===S.user.id);
+  showLoader();
+  let full=task;
+  try{const r=await API.getTask(taskId);full=r.task}catch(_){}
+  hideLoader();
+  const hist=(full.activity_history||[]).map((e,i)=>`<div class="flex gap-3 py-2 ${i<(full.activity_history.length-1)?'border-b border-gray-100':''}">
+    <div class="w-2 h-2 rounded-full bg-[#897059] mt-2 flex-shrink-0"></div>
+    <div><div class="flex gap-2 flex-wrap mb-0.5">
+      ${e.user_label?`<span class="text-xs font-bold text-[#897059] bg-amber-50 px-2 py-0.5 rounded-full">${esc(e.user_label)}</span>`:''}
+      <span class="text-[11px] text-gray-400">${fmtDate(e.created_at)}</span>
+      ${i===0?'<span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">Latest</span>':''}
+    </div><p class="text-sm text-gray-700">${esc(e.comment)}</p></div></div>`).join('');
+  const adminFields=S.user.role==='admin'?`
+    <div class="grid grid-cols-2 gap-4 border-t border-gray-100 pt-3">
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Start Date</label>
+        <input type="date" id="upStart" value="${full.start_date||''}" class="w-full p-2.5 border rounded-lg text-sm"></div>
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Lead Time</label>
+        <input type="number" id="upLead" value="${full.lead_time||''}" class="w-full p-2.5 border rounded-lg text-sm"></div>
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Slack Note</label>
+        <input type="text" id="upSlack" value="${esc(full.slack_note||'')}" class="w-full p-2.5 border rounded-lg text-sm col-span-2" placeholder="e.g. delayed 2 days"></div>
+    </div>
+    <button onclick="doDelete('${taskId}')" class="w-full py-2.5 bg-red-500 text-white rounded-lg font-bold text-sm hover:bg-red-600">Delete Task</button>`:'';
+  document.getElementById('detailContent').innerHTML=`<div class="space-y-4">
+    <div class="bg-gray-50 rounded-xl p-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+      <div><p class="text-gray-400 uppercase font-bold mb-0.5">Lead Time</p><p class="font-semibold">${full.lead_time||'—'}</p></div>
+      <div><p class="text-gray-400 uppercase font-bold mb-0.5">Start</p><p class="font-semibold">${fmtDate(full.start_date)}</p></div>
+      <div><p class="text-gray-400 uppercase font-bold mb-0.5">Planned End</p><p class="font-semibold ${full.is_overdue?'text-red-600':''}">${fmtDate(full.planned_end)}</p></div>
+      <div><p class="text-gray-400 uppercase font-bold mb-0.5">Actual End</p><p class="font-semibold ${full.actual_end?'text-green-600':'text-gray-300 italic'}">${fmtDate(full.actual_end)||'Not set'}</p></div>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Status</label>
+        <select id="upStatus" class="w-full p-2.5 border rounded-lg text-sm ${!canEdit?'bg-gray-100':''}" ${!canEdit?'disabled':''}>
+          <option ${full.status==='Not Started'?'selected':''}>Not Started</option>
+          <option ${full.status==='On Going'?'selected':''}>On Going</option>
+          <option ${full.status==='Completed'?'selected':''}>Completed</option>
+        </select></div>
+      <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Actual End Date</label>
+        <input type="date" id="upActual" value="${full.actual_end||''}" class="w-full p-2.5 border rounded-lg text-sm ${!canEdit?'bg-gray-100':''}" ${!canEdit?'disabled':''}></div>
+    </div>
+    <div><label class="block text-xs font-bold text-gray-400 uppercase mb-1">Activity Update</label>
+      <textarea id="upComment" rows="3" class="w-full p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-[#897059] outline-none resize-none" placeholder="Write your update…" ${!canEdit?'disabled':''}></textarea></div>
+    ${adminFields}
+    <div class="flex gap-2 pt-1 border-t border-gray-100">
+      <button onclick="setTodayEnd()" class="flex-1 py-2.5 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm">Set Today as Actual End</button>
+      ${canEdit?`<button onclick="doSave('${taskId}')" id="saveBtn" class="flex-1 py-2.5 btn-brand rounded-lg font-bold text-sm">Save Changes</button>`:''}
+    </div>
+    <div><div class="flex items-center gap-2 mb-2"><i class="fas fa-history text-[#897059] text-sm"></i><span class="text-xs font-bold text-gray-600 uppercase">History</span><span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">${(full.activity_history||[]).length} entries</span></div>
+      <div class="max-h-56 overflow-y-auto">${hist||'<p class="text-sm text-gray-400 py-2">No activity yet.</p>'}</div></div>
+  </div>`;
+  document.getElementById('detailModal').style.display='flex';
+}
+async function doSave(taskId){
+  if(S.saving)return;S.saving=true;const btn=document.getElementById('saveBtn');if(btn){btn.disabled=true;btn.textContent='Saving…'}
+  showLoader();
+  try{
+    const payload={status:document.getElementById('upStatus').value,actual_end:document.getElementById('upActual').value||null,comment:(document.getElementById('upComment').value||'').trim()};
+    if(S.user.role==='admin'){
+      payload.start_date=document.getElementById('upStart')?.value||null;
+      payload.lead_time=document.getElementById('upLead')?.value?parseInt(document.getElementById('upLead').value,10):null;
+      payload.slack_note=document.getElementById('upSlack')?.value||null;
+    }
+    await API.updateTask(taskId,payload);
+    const tp=await API.getTasks();S.tasks=tp.tasks||[];
+    closeModal();renderTasks();
+  }catch(e){alert(e.message)}
+  finally{hideLoader();S.saving=false;if(btn){btn.disabled=false;btn.textContent='Save Changes'}}
+}
+async function doDelete(taskId){
+  if(!confirm('Delete this task permanently?'))return;
+  showLoader();
+  try{await API.deleteTask(taskId);const tp=await API.getTasks();S.tasks=tp.tasks||[];closeModal();renderTasks()}catch(e){alert(e.message)}
+  finally{hideLoader()}
+}
+function setTodayEnd(){document.getElementById('upActual').value=new Date().toISOString().split('T')[0]}
+
+// ── ASSIGN MODAL ──────────────────────────────────────────────────
+function showAssign(){
+  const ps=document.getElementById('asProj');ps.innerHTML=S.projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  const ts=document.getElementById('asTask');ts.innerHTML='<option value="">Select SOP task</option>'+S.sop.map(s=>`<option value="${s.task_code}" data-dept="${s.department}" data-lead="${s.lead_time_spp||''}">${esc(s.task_code)} — ${esc(s.name)}</option>`).join('');
+  ['asStart','asLead','asPlanned','asDept'].forEach(id=>document.getElementById(id).value='');
+  priSel=[];secSel=[];renderTags();
+  document.getElementById('assignModal').style.display='flex';
+}
+function onSopChange(){const o=document.getElementById('asTask').selectedOptions[0];if(!o||!o.value)return;document.getElementById('asDept').value=o.dataset.dept||'';document.getElementById('asLead').value=o.dataset.lead||'';calcEnd()}
+function calcEnd(){const sv=document.getElementById('asStart').value;const lv=parseInt(document.getElementById('asLead').value,10);document.getElementById('asPlanned').value=(!sv||isNaN(lv)||lv<=0)?'':addWorkDays(sv,lv)}
+function openDD(type){document.getElementById((type==='pri'?'pri':'sec')+'DD').classList.add('open');renderDD(type,'')}
+function filterDD(type){const q=(document.getElementById((type==='pri'?'pri':'sec')+'Search').value||'').toLowerCase();renderDD(type,q)}
+function renderDD(type,q){
+  const dd=document.getElementById(type==='pri'?'priDD':'secDD');const sel=type==='pri'?priSel:secSel;
+  dd.innerHTML='';
+  S.users.filter(u=>!q||u.email.toLowerCase().includes(q)||u.name.toLowerCase().includes(q)).forEach(u=>{
+    const isSel=sel.includes(u.id);const div=document.createElement('div');div.className='assign-option'+(isSel?' selected':'');
+    div.innerHTML=`<div style="width:14px;height:14px;border-radius:3px;border:1.5px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;${isSel?'background:#10b981;border-color:#10b981;color:#fff;':''}font-size:9px">${isSel?'✓':''}</div><span>${esc(u.name)}</span><span class="text-[10px] text-gray-400">${esc(u.email)}</span>`;
+    div.onclick=e=>{e.stopPropagation();toggleDD(type,u.id);};dd.appendChild(div);
+  });
+  if(!dd.children.length)dd.innerHTML='<div class="px-3 py-2 text-xs text-gray-400">No results</div>';
+}
+function toggleDD(type,uid){const sel=type==='pri'?priSel:secSel;const idx=sel.indexOf(uid);if(idx>-1)sel.splice(idx,1);else sel.push(uid);renderTags();renderDD(type,document.getElementById(type==='pri'?'priSearch':'secSearch').value||'')}
+function renderTags(){
+  ['pri','sec'].forEach(t=>{
+    const wrap=document.getElementById(t+'Tags');const sel=t==='pri'?priSel:secSel;wrap.innerHTML='';
+    sel.forEach(uid=>{const u=S.users.find(x=>x.id===uid);if(!u)return;const span=document.createElement('span');span.className='assign-tag'+(t==='sec'?' secondary':'');span.innerHTML=`${esc(u.name.split(' ')[0])} <button onclick="toggleDD('${t}','${uid}')">×</button>`;wrap.appendChild(span)});
+  });
+}
+async function confirmAssign(){
+  if(!priSel.length){alert('Select at least one primary assignee');return}
+  const so=document.getElementById('asTask').selectedOptions[0];
+  if(!so||!so.value){alert('Select a task');return}
+  const payload={task_code:so.value,project_id:document.getElementById('asProj').value,name:so.text.split('—').slice(1).join('—').trim(),department:document.getElementById('asDept').value,lead_time:parseInt(document.getElementById('asLead').value,10)||null,start_date:document.getElementById('asStart').value,primary_assignee_ids:priSel,secondary_assignee_ids:secSel};
+  if(!payload.project_id||!payload.task_code||!payload.start_date){alert('Fill all required fields');return}
+  const btn=document.getElementById('assignBtn');btn.disabled=true;btn.textContent='Assigning…';showLoader();
+  try{await API.createTask(payload);const tp=await API.getTasks();S.tasks=tp.tasks||[];closeModal();renderTasks()}catch(e){alert(e.message)}
+  finally{hideLoader();btn.disabled=false;btn.textContent='Assign Task'}
+}
+
+// ── BULK ──────────────────────────────────────────────────────────
+function showBulkModal(){document.getElementById('bulkCount').textContent=S.selectedIds.size;document.getElementById('bulkModal').style.display='flex'}
+async function confirmBulk(){
+  if(!S.selectedIds.size){alert('Select tasks first');return}
+  const st=document.getElementById('bulkStatus').value;
+  showLoader();
+  try{await API.bulkStatus([...S.selectedIds],st);S.selectedIds.clear();const tp=await API.getTasks();S.tasks=tp.tasks||[];closeModal();renderTasks()}catch(e){alert(e.message)}
+  finally{hideLoader()}
+}
+
+// ── SECTIONS ─────────────────────────────────────────────────────
+const SECS=['tasks','control','meeting','reports'];
+function switchSection(sec){
+  SECS.forEach(s=>{const el=document.getElementById('sec-'+s);if(el)el.classList.toggle('hidden',s!==sec)});
+  document.querySelectorAll('.sec-tab').forEach(t=>t.classList.toggle('active',t.dataset.sec===sec));
+  if(sec==='reports')loadReports();if(sec==='control')loadControlTower();if(sec==='meeting')loadMeeting();
+}
+
+// ── CONTROL TOWER ─────────────────────────────────────────────────
+async function loadControlTower(){
+  const el=document.getElementById('ctSections');el.innerHTML='<div class="text-gray-400 text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Loading…</div>';
+  showLoader();
+  try{
+    const {controlTower:ct}=await API.getControlTower();
+    el.innerHTML='';
+    const sections=[['ctUrgent','Urgent & Due Soon','ct-urgent',ct.urgent||[],'f59e0b'],['ctSilent','Silent (48h+ no update)','ct-silent',ct.silent||[],'8b5cf6'],['ctCritical','Critical & Overdue','ct-critical',ct.critical||[],'ef4444']];
+    sections.forEach(([id,label,cls,items,color])=>{
+      const div=document.createElement('div');div.className='mb-5';
+      div.innerHTML=`<div class="flex items-center gap-2 mb-3"><span class="w-3 h-3 rounded-full" style="background:#${color}"></span><h3 class="font-bold text-gray-700 text-sm">${label}</h3><span class="text-xs px-2 py-0.5 rounded-full font-bold" style="background:#${color}22;color:#${color}">${items.length}</span></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3" id="${id}"></div>`;el.appendChild(div);
+      const grid=document.getElementById(id);
+      if(!items.length){grid.innerHTML='<div class="text-sm text-gray-400">None — all clear!</div>';return}
+      items.slice(0,12).forEach(t=>{
+        const card=document.createElement('div');card.className=`ct-card ${cls}`;card.onclick=()=>{switchSection('tasks');setTimeout(()=>openDetail(t.id),100)};
+        card.innerHTML=`<div class="flex items-start justify-between gap-2 mb-1"><div class="font-semibold text-gray-800 text-sm leading-tight truncate flex-1">${esc(t.name)}</div><span class="sb ${t.is_overdue?'sb-late':'sb-og'} flex-shrink-0">${esc(t.status)}</span></div>
+          <div class="text-xs text-gray-500">${esc(t.project_name)} · <span class="font-mono">${esc(t.task_code)}</span></div>
+          <div class="text-xs text-gray-400 mt-1">Due: <span class="${t.is_overdue?'text-red-600 font-bold':''}">${fmtDate(t.planned_end)}</span></div>`;
+        grid.appendChild(card);
+      });
+    });
+    // Performance
+    const pt=document.createElement('div');pt.innerHTML=`<div class="flex items-center gap-2 mb-3"><span class="w-3 h-3 rounded-full bg-blue-500"></span><h3 class="font-bold text-gray-700 text-sm">Employee Performance</h3></div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"><table class="w-full text-sm"><thead class="bg-gray-50 border-b"><tr>
+        <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-left">Employee</th>
+        <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">Total</th>
+        <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">Done</th>
+        <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">On-Time</th>
+        <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase text-center">Delayed</th>
+        <th class="px-4 py-3 text-xs font-bold text-gray-500 uppercase">Rate</th>
+      </tr></thead><tbody id="perfTable"></tbody></table></div>`;
+    el.appendChild(pt);
+    const tbody=document.getElementById('perfTable');
+    (ct.performance||[]).forEach(p=>{
+      const pct=p.completed?Math.round((p.on_time/p.completed)*100):0;
+      const tr=document.createElement('tr');tr.className='border-b border-gray-50 hover:bg-gray-50';
+      tr.innerHTML=`<td class="px-4 py-3 font-medium text-gray-700">${esc(p.name)}</td><td class="px-4 py-3 text-center">${p.total_tasks}</td><td class="px-4 py-3 text-center text-green-600 font-bold">${p.completed}</td><td class="px-4 py-3 text-center text-blue-600">${p.on_time}</td><td class="px-4 py-3 text-center text-red-500">${p.delayed}</td>
+        <td class="px-4 py-3 min-w-[120px]"><div class="flex items-center gap-2"><div class="perf-bar flex-1"><div class="perf-fill" style="width:${pct}%"></div></div><span class="text-xs font-bold text-gray-500">${pct}%</span></div></td>`;
+      tbody.appendChild(tr);
+    });
+  }catch(e){el.innerHTML=`<div class="text-red-500">${esc(e.message)}</div>`}
+  finally{hideLoader()}
+}
+
+// ── MEETING BOARD ─────────────────────────────────────────────────
+async function loadMeeting(){
+  const board=document.getElementById('meetingBoard');board.innerHTML='<div class="text-gray-400 text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Loading…</div>';
+  showLoader();
+  try{
+    const {board:tasks}=await API.getMeetingBoard();board.innerHTML='';
+    if(!tasks.length){board.innerHTML='<div class="text-gray-400 text-sm p-4">No active tasks.</div>';return}
+    const groups={};tasks.forEach(t=>{if(!groups[t.project_name])groups[t.project_name]=[];groups[t.project_name].push(t)});
+    Object.entries(groups).forEach(([proj,ptasks])=>{
+      const col=document.createElement('div');col.className='board-col';
+      col.innerHTML=`<div class="font-bold text-sm text-amber-800 uppercase tracking-wider mb-3 px-1"><i class="fas fa-folder-open mr-1.5 opacity-70"></i>${esc(proj)}</div>`;
+      ptasks.forEach(t=>{
+        const card=document.createElement('div');card.className=`board-card${t.is_overdue?' border-l-4 border-l-red-400':''}`;
+        card.innerHTML=`<div class="flex items-start justify-between gap-2 mb-1.5"><span class="font-semibold text-sm text-gray-800 leading-tight flex-1">${esc(t.name)}</span><span class="sb ${t.status==='On Going'?'sb-og':'sb-ns'} flex-shrink-0">${esc(t.status)}</span></div>
+          <div class="text-xs text-gray-400 mb-1"><span class="font-mono">${esc(t.task_code)}</span> · ${esc(t.department||'')}</div>
+          <div class="text-xs text-gray-400 mb-2">Due: ${fmtDate(t.planned_end)}</div>
+          <div class="flex gap-2"><button onclick="openDetail('${t.id}')" class="upd-btn text-[11px] py-1">Update</button></div>`;
+        col.appendChild(card);
+      });
+      board.appendChild(col);
+    });
+  }catch(e){document.getElementById('meetingBoard').innerHTML=`<div class="text-red-500">${esc(e.message)}</div>`}
+  finally{hideLoader()}
+}
+
+// ── REPORTS ───────────────────────────────────────────────────────
+async function loadReports(){
+  document.getElementById('rptOverview').innerHTML='<div class="col-span-4 text-gray-400 text-sm"><i class="fas fa-spinner fa-spin mr-2"></i>Loading…</div>';
+  showLoader();
+  try{
+    const {summary:s}=await API.getSummary();
+    document.getElementById('rptOverview').innerHTML=[
+      `<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-xs text-gray-400 font-semibold mb-1">Total</p><h3 class="text-3xl font-bold text-gray-800">${s.total}</h3></div>`,
+      `<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-xs text-green-400 font-semibold mb-1">Completed</p><h3 class="text-3xl font-bold text-green-600">${s.completed}</h3></div>`,
+      `<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-xs text-blue-400 font-semibold mb-1">On Going</p><h3 class="text-3xl font-bold text-blue-600">${s.ongoing}</h3></div>`,
+      `<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center"><p class="text-xs text-red-400 font-semibold mb-1">Delayed</p><h3 class="text-3xl font-bold text-red-500">${s.delayed}</h3></div>`,
+    ].join('');
+    const pb=document.getElementById('rptProjBody');pb.innerHTML='';
+    (s.byProject||[]).forEach(p=>{
+      const pct=p.pct_complete||0;const tr=document.createElement('tr');tr.className='border-b border-gray-50 hover:bg-gray-50';
+      tr.innerHTML=`<td class="px-4 py-2.5 font-medium text-gray-700">${esc(p.project)}</td><td class="px-4 py-2 text-center">${p.total}</td><td class="px-4 py-2 text-center text-green-600 font-bold">${p.done}</td><td class="px-4 py-2 text-center text-blue-600">${p.ongoing}</td><td class="px-4 py-2 text-center text-red-500">${p.delayed}</td>
+        <td class="px-4 py-2 min-w-[120px]"><div class="flex items-center gap-2"><div class="perf-bar flex-1"><div class="perf-fill" style="width:${pct}%"></div></div><span class="text-xs font-bold text-gray-500">${pct}%</span></div></td>`;
+      pb.appendChild(tr);
+    });
+  }catch(e){document.getElementById('rptOverview').innerHTML=`<div class="col-span-4 text-red-500">${esc(e.message)}</div>`}
+  finally{hideLoader()}
+}
+async function loadWeekly(){
+  const wrap=document.getElementById('rptWeeklyWrap');const area=document.getElementById('rptWeeklyText');
+  area.textContent='Generating…';wrap.classList.remove('hidden');showLoader();
+  try{const r=await API.getWeeklySummary();area.textContent=r.text||'No data'}catch(e){area.textContent=e.message}
+  finally{hideLoader()}
+}
+function printReport(){const txt=document.getElementById('rptWeeklyText').textContent;const w=window.open('','_blank');w.document.write(`<html><head><title>Sanmar Weekly Report</title><style>body{font-family:monospace;font-size:13px;padding:24px}pre{white-space:pre-wrap}</style></head><body><pre>${txt.replace(/</g,'&lt;')}</pre></body></html>`);w.document.close();w.print()}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────
+async function loadNotifs(){
+  if(document.hidden)return;
+  try{const r=await API.getNotifications();renderNotifs(r.notifications||[])}catch(_){}
+}
+function renderNotifs(list){
+  const dot=document.getElementById('notifDot');const holder=document.getElementById('notifList');holder.innerHTML='';
+  dot.style.display=list.length?'block':'none';
+  if(list.length){list.forEach(n=>{const d=document.createElement('div');d.className='px-4 py-3 text-sm hover:bg-gray-50 cursor-pointer';d.innerHTML=`<p class="text-gray-800 font-medium text-sm">${esc(n.message)}</p><p class="text-xs text-gray-400 mt-1">${esc(n.project_name||'')}${n.task_code?' · '+esc(n.task_code):''} · ${fmtDate(n.created_at)}</p>`;d.onclick=()=>{document.getElementById('notifDropdown').classList.add('hidden');if(n.task_id){const t=S.tasks.find(x=>x.id===n.task_id);if(t)openDetail(t.id)}};holder.appendChild(d)})}
+  else{holder.innerHTML=`<div class="px-4 py-8 text-center"><i class="fas fa-bell-slash text-2xl text-gray-300 mb-2"></i><p class="text-sm text-gray-400">No new notifications</p></div>`}
+}
+function toggleNotifs(){document.getElementById('notifDropdown').classList.toggle('hidden')}
+async function markRead(){document.getElementById('notifDot').style.display='none';await API.markNotificationsRead().catch(()=>{});await loadNotifs()}
+
+// ── MODAL ─────────────────────────────────────────────────────────
+function closeModal(){['detailModal','assignModal','bulkModal'].forEach(id=>document.getElementById(id).style.display='none');document.body.style.overflow=''}
+document.addEventListener('click',e=>{
+  ['priWrap','secWrap'].forEach(id=>{const w=document.getElementById(id);if(w&&!w.contains(e.target))document.getElementById(id.replace('Wrap','DD'))?.classList.remove('open')});
+  const nw=document.getElementById('notifWrap');if(nw&&!nw.contains(e.target))document.getElementById('notifDropdown')?.classList.add('hidden');
+});
+
+// ── DEVICE REDIRECT ───────────────────────────────────────────────
+(function(){const ua=navigator.userAgent||'';if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)||window.innerWidth<768){const h=window.location.href;if(h.indexOf('page=')===-1)window.location.replace(h+(h.indexOf('?')>-1?'&':'?')+'page=mobile')}})();
+
+// ── INIT ──────────────────────────────────────────────────────────
+window.onload=async()=>{
+  const cached=localStorage.getItem('sp_user');
+  if(cached){
+    try{S.user=JSON.parse(cached);const r=await API.getMe().catch(()=>null);if(r?.user){S.user=r.user;await bootstrap();return}}catch(_){}
+  }
+  document.getElementById('loginScreen').style.display='flex';
+};
+</script>
+</body>
+</html>
