@@ -158,7 +158,7 @@ async function seed() {
     // ── Users ──
     logger.info(`Inserting ${EMPLOYEES.length} users...`);
     for (const emp of EMPLOYEES) {
-      const hash = await bcrypt.hash(emp.password, 12);
+      const hash = await bcrypt.hash(emp.password, 10);
       await client.query(`
         INSERT INTO users (name, email, password_hash, role, phone, department, is_active, has_meeting)
         VALUES ($1,$2,$3,$4,$5,$6,TRUE,$7)

@@ -686,9 +686,26 @@ document.addEventListener('click',e=>{
 
 // ── INIT ──────────────────────────────────────────────────────────
 window.onload=async()=>{
+  // Use event listeners instead of inline onclick (avoids CSP issues)
+  const loginBtn=document.getElementById('loginBtn');
+  const loginPass=document.getElementById('loginPass');
+  if(loginBtn) loginBtn.addEventListener('click',doLogin);
+  if(loginPass) loginPass.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+  // Wire other buttons that use onclick as fallback
+  document.querySelectorAll('[data-action]').forEach(el=>{
+    const fn=el.getAttribute('data-action');
+    if(window[fn]) el.addEventListener('click',window[fn]);
+  });
+
   const cached=localStorage.getItem('sp_user');
   if(cached){
-    try{S.user=JSON.parse(cached);const r=await API.getMe().catch(()=>null);if(r?.user){S.user=r.user;await bootstrap();return}}catch(_){}
+    try{
+      S.user=JSON.parse(cached);
+      const r=await API.getMe().catch(()=>null);
+      if(r?.user){S.user=r.user;await bootstrap();return;}
+    }catch(_){}
+    localStorage.removeItem('sp_user');
   }
   document.getElementById('loginScreen').style.display='flex';
 };

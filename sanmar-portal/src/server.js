@@ -2,7 +2,6 @@
 require('dotenv').config();
 
 const express      = require('express');
-const helmet       = require('helmet');
 const cors         = require('cors');
 const compression  = require('compression');
 const cookieParser = require('cookie-parser');
@@ -27,10 +26,6 @@ const PORT = process.env.PORT || 3000;
 // ── SECURITY & PARSING MIDDLEWARE ──────────────────────────────────
 app.set('trust proxy', 1); // Railway sits behind a proxy
 
-app.use(helmet({
-  contentSecurityPolicy: false,
-}));
-
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(',');
 app.use(cors({
   origin: (origin, cb) => {
@@ -46,9 +41,13 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // ── STATIC FILES ──────────────────────────────────────────────────
+// HTML files: no cache. JS/CSS: cache ok.
 app.use(express.static(path.join(__dirname, '..', 'public'), {
-  maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
-  etag: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    }
+  },
 }));
 
 // ── HEALTH CHECK (unauthenticated, used by Railway) ───────────────
