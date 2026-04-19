@@ -28,16 +28,7 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', 1); // Railway sits behind a proxy
 
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc:  ["'self'"],
-      scriptSrc:   ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'cdn.tailwindcss.com', 'cdnjs.cloudflare.com', 'fonts.googleapis.com'],
-      styleSrc:    ["'self'", "'unsafe-inline'", 'cdn.tailwindcss.com', 'cdnjs.cloudflare.com', 'fonts.googleapis.com', 'fonts.gstatic.com'],
-      fontSrc:     ["'self'", 'fonts.gstatic.com', 'fonts.googleapis.com', 'data:'],
-      imgSrc:      ["'self'", 'data:', 'drive.google.com', '*.googleusercontent.com'],
-      connectSrc:  ["'self'"],
-    },
-  },
+  contentSecurityPolicy: false,
 }));
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(',');
