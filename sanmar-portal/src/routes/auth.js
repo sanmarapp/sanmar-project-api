@@ -16,7 +16,7 @@ const COOKIE_OPTS = {
 // POST /api/v1/auth/login
 router.post('/login',
   loginLimiter,
-  body('email').isEmail().normalizeEmail(),
+  body('email').isEmail().normalizeEmail({ gmail_remove_dots: false }),
   body('password').isLength({ min: 4 }),
   async (req, res) => {
     const errors = validationResult(req);
