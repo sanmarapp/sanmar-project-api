@@ -15,8 +15,8 @@ const API = (() => {
     const opts = { method, headers, credentials: 'include' };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(BASE + path, opts);
-    // Auto-refresh on 401 expired token
-    if (res.status === 401 && retry) {
+    // Auto-refresh on 401 — but NOT for the login endpoint itself
+    if (res.status === 401 && retry && !path.includes('/auth/login')) {
       const json = await res.json().catch(() => ({}));
       if (json.expired) {
         if (!_refreshPromise) {
